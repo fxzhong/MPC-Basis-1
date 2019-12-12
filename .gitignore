@@ -1,0 +1,9 @@
+*.mp4
+*.asv
+*.png
+*.mat
+**/Data
+!spec/*.mp4
+!spec/*.asv
+!spec/*.png
+!spec/*.mat
