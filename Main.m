@@ -35,6 +35,7 @@ u0 = zeros(t_h, 2);
 u0(:,1) = 5;
 u0(:,2) = 5;
 u = u0;
+%velocity constraint dxm is a soft constraint
 dxm = 6;
 
 t = 0;
@@ -45,7 +46,8 @@ d_obj = 1000;
 %preset parameters for online tuning
 du_k = 1;
 d_obj_th = 5;
-weight = 2;
+weight = 3;
+weight_u = 0.1; %Note that enlarging this weight should be accompanied by enlarging obstacle avoidance weight "weight"
 
 FrameRate = 0;
 elapsedTime = 0;
@@ -53,7 +55,9 @@ elapsedTime = 0;
 while true
     
     tic
-    %x_end = [0.9*width, 0.4*height + 50*sin(0.1*t)];
+    
+%     x_end = [0.9*width, 0.4*height + 50*sin(0.1*t)];
+    
     while abs(d_obj) > d_obj_th
         %Calculate the initial estimated states evolution from t1 to tn
         x(1,:) = x_current;
@@ -77,7 +81,6 @@ while true
         for i = 1:t_h-1
             obj = obj + 1/(norm(x(i,:) - x_obst(1:2)) - x_obst(3));
             du(i,:) = lambda(i,:);
-            weight_u = 0.1;
             if norm(x(i+1,:)-x(i,:)) > dxm
                 obj = obj + 0.5*(norm(x(i+1,:)-x(i,:))-dxm)^2;
                 du(i,:) = du(i,:) - weight_u*(norm(x(i+1,:)-x(i,:))-dxm)*(x(i+1,:)-x(i,:));
@@ -138,8 +141,8 @@ while true
     hold off;
     
     %Video settings
-%     frame = getframe(gca); % 'gcf' can handle if you zoom in to take a movie.
-%     writeVideo(writerObj, frame);
+    frame = getframe(gca); % 'gcf' can handle if you zoom in to take a movie.
+    writeVideo(writerObj, frame);
     
     t = t + 1;
     
