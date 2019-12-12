@@ -1,9 +1,11 @@
 *.mp4
+*.docx
 *.asv
 *.png
 *.mat
 **/Data
 !spec/*.mp4
+!spec/*.docx
 !spec/*.asv
 !spec/*.png
 !spec/*.mat
