@@ -36,7 +36,7 @@ u0(:,1) = 5;
 u0(:,2) = 5;
 u = u0;
 %velocity constraint dxm is a soft constraint
-dxm = 6;
+dxm = 3;
 
 t = 0;
 t_step = 0;
@@ -45,9 +45,9 @@ obj_old = 0;
 d_obj = 1000;
 %preset parameters for online tuning
 du_k = 1;
-d_obj_th = 5;
-weight = 3;
-weight_u = 0.1; %Note that enlarging this weight should be accompanied by enlarging obstacle avoidance weight "weight"
+epsilon = 0.1;
+weight_l2 = 3;
+weight_l1 = 0.1; %Note that enlarging this weight should be accompanied by enlarging obstacle avoidance weight "weight"
 
 FrameRate = 0;
 elapsedTime = 0;
@@ -56,9 +56,9 @@ while true
     
     tic
     
-%     x_end = [0.9*width, 0.4*height + 50*sin(0.1*t)];
+    x_end = [0.9*width, 0.4*height + 50*sin(0.1*t)];
     
-    while abs(d_obj) > d_obj_th
+    while abs(d_obj) > epsilon
         %Calculate the initial estimated states evolution from t1 to tn
         x(1,:) = x_current;
         for i = 1:t_h-1
@@ -71,7 +71,7 @@ while true
         lambda(t_h, :) = -0.001*(x(t_h,:) - x_end);
         for i = t_h-1:-1:1
             %lambda(i) = lambda(i+1) + dH/dx
-            lambda(i,:)  = lambda(i+1,:) + weight*(x(i+1,:)-x_obst(1:2))/(norm(x(i+1,:)-x_obst(1:2))- x_obst(3))/(norm(x(i+1,:)-x_obst(1:2)) - x_obst(3))/norm(x(i+1,:)-x_obst(1:2));
+            lambda(i,:)  = lambda(i+1,:) + weight_l2*(x(i+1,:)-x_obst(1:2))/(norm(x(i+1,:)-x_obst(1:2))- x_obst(3))/(norm(x(i+1,:)-x_obst(1:2)) - x_obst(3))/norm(x(i+1,:)-x_obst(1:2));
         end
         
         %Calculate objective function with the control horizon
@@ -83,7 +83,7 @@ while true
             du(i,:) = lambda(i,:);
             if norm(x(i+1,:)-x(i,:)) > dxm
                 obj = obj + 0.5*(norm(x(i+1,:)-x(i,:))-dxm)^2;
-                du(i,:) = du(i,:) - weight_u*(norm(x(i+1,:)-x(i,:))-dxm)*(x(i+1,:)-x(i,:));
+                du(i,:) = du(i,:) - weight_l1*(norm(x(i+1,:)-x(i,:))-dxm)*(x(i+1,:)-x(i,:));
             end
             if norm(x(i+1,:)-x(i,:)) > dxmax
                 dxmax = norm(x(i+1,:)-x(i,:));
@@ -107,18 +107,20 @@ while true
     plot(x(:,1), x(:,2), '.b', 'MarkerSize', 5);
     textt = ['Obj: ', num2str(obj)];
     text(30,30,textt,'Color','k');
-    textt = ['dObj: ', num2str(d_obj)];
+    textt = ['d_Obj: ', num2str(d_obj)];
     text(30,60,textt,'Color','k');
-    textt = ['Opti_t: ', num2str(t_step)];
+    textt = ['Num_optim: ', num2str(t_step)];
     text(30,90,textt,'Color','k');
-    textt = ['vtmax: ', num2str(dxmax)];
+    textt = ['vtmax: ', num2str(dxmax),'/',num2str(dxm)];
     text(30,120,textt,'Color','k');
-    textt = ['du-k: ', num2str(du_k)];
+    textt = ['horizon: ', num2str(t_h)];
     text(30,height-30,textt,'Color','k');
-    textt = ['dObj-th: ', num2str(d_obj_th)];
+    textt = ['weight-l_1: ', num2str(weight_l1)];
     text(30,height-60,textt,'Color','k');
-    textt = ['weight: ', num2str(weight)];
+    textt = ['weight-l_2: ', num2str(weight_l2)];
     text(30,height-90,textt,'Color','k');
+    textt = ['\epsilon: ', num2str(epsilon)];
+    text(30,height-120,textt,'Color','k');
     textt = [num2str(FrameRate), ' fps'];
     text(width-110,30,textt,'Color','k');
     %Keyboard input callback
