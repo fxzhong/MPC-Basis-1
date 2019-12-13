@@ -18,9 +18,9 @@ writerObj.FrameRate = 30; % How many frames per second.
 open(writerObj);
 
 %conrol time horizon
-t_h = 10;
+t_h = 30;
 %control task specification
-x_obst = [0.3*width, 0.5*height-50, 80;0.6*width, 0.5*height, 30;0.8*width, 0.5*height, 30]; %the size is in radius  
+x_obst = [0.3*width, 0.5*height-50, 80;0.6*width, 0.5*height, 30;0.8*width, 0.55*height, 30]; %the size is in radius  
 x_start = [50, 0.5*height];
 x_end = [0.9*width, 0.4*height];
 
@@ -45,9 +45,9 @@ obj_old = 0;
 d_obj = 1000;
 %preset parameters for online tuning
 du_k = 1; %change of u, too small low iteration, too fast will crash
-epsilon = 0.01;
-weight_l2 = 1; %to avoid obstacle
-weight_l1 = 0.1; %to avoid maximum v (Note that enlarging this weight should be accompanied by enlarging obstacle avoidance weight "weight")
+epsilon = 0.5;
+weight_l2 = 3; %to avoid obstacle
+weight_l1 = 0.5; %to avoid maximum v (Note that enlarging this weight should be accompanied by enlarging obstacle avoidance weight "weight")
 
 FrameRate = 0;
 elapsedTime = 0;
@@ -150,8 +150,8 @@ while true
     hold off;
     
     %Video settings
-    frame = getframe(gca); % 'gcf' can handle if you zoom in to take a movie.
-    writeVideo(writerObj, frame);
+%     frame = getframe(gca); % 'gcf' can handle if you zoom in to take a movie.
+%     writeVideo(writerObj, frame);
     
     t = t + 1;
     
